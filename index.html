@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Secure Chat Application — Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <!-- AUTH -->
+  <section class="auth" id="auth">
+    <form class="card" id="authForm" data-mode="login" autocomplete="off">
+      <h1 class="brand">🛡️ Secure Chat</h1>
+      <h2 id="authTitle">Welcome back</h2>
+      <p class="muted" id="authSub">Log in to your end-to-end encrypted inbox.</p>
+      <p class="error" id="authError" role="alert"></p>
+      <label class="only-register">Full name<input name="name" placeholder="Your name"></label>
+      <label>Username<input name="username" required placeholder="poorvi"></label>
+      <label>Password<input name="password" type="password" required placeholder="••••••••"></label>
+      <button class="btn" type="submit" id="authSubmit">Sign in</button>
+      <p class="muted center"><span id="switchText">New here?</span> <button type="button" class="link" id="switchBtn">Create an account</button></p>
+      <p class="note">Demo account: <code>poorvi</code> / <code>demo</code>. Passwords are hashed with PBKDF2 and messages encrypted with AES-GCM via the browser's Web Crypto API. The "server" and database are simulated locally.</p>
+    </form>
+  </section>
+
+  <!-- CHAT -->
+  <div class="chat" id="chat" hidden>
+    <aside class="side">
+      <header class="me">
+        <span class="avatar" id="meAvatar">P</span>
+        <div><b id="meName">Poorvi</b><small class="ok">● Session active</small></div>
+        <button class="ghost" id="logout">Log out</button>
+      </header>
+      <nav class="contacts" id="contacts" aria-label="Conversations"></nav>
+      <footer class="tools">
+        <button class="tool" popovertarget="serverDrawer">Server relay</button>
+        <button class="tool" popovertarget="scamDrawer">Scam log</button>
+      </footer>
+    </aside>
+
+    <main class="main">
+      <header class="head">
+        <span class="avatar" id="hAvatar">R</span>
+        <div><b id="hName">Rahul Verma</b><small class="muted" id="hStatus">online</small></div>
+        <span class="pill">🔒 End-to-end encrypted</span>
+      </header>
+      <div class="messages" id="messages" aria-live="polite"></div>
+      <form class="composer" id="composer">
+        <textarea id="input" rows="1" placeholder="Type an encrypted message…"></textarea>
+        <button class="send" aria-label="Send">➤</button>
+        <small class="muted">Enter to send · try “share your OTP” or “click this link” to trigger scam detection.</small>
+      </form>
+    </main>
+
+    <aside class="drawer" id="serverDrawer" popover>
+      <h3>Server relay log</h3>
+      <p class="muted">The backend only ever sees ciphertext.</p>
+      <div id="serverLog"></div>
+    </aside>
+    <aside class="drawer" id="scamDrawer" popover>
+      <h3>Scam detection log</h3>
+      <p class="muted">Scanned on the recipient's device after decryption.</p>
+      <div id="scamLog"></div>
+    </aside>
+  </div>
+</body>
+</html>

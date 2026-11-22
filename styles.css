@@ -1,0 +1,142 @@
+/* Secure Chat — styles.css
+   Uses: @layer, native nesting, light-dark(), color-mix(), :has(),
+   container queries, popover + @starting-style, field-sizing, clamp() */
+
+@layer reset, tokens, layout, components, motion;
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+  body { min-height: 100dvh; }
+  button, input, textarea { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+}
+
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+    --bg:    light-dark(#f3f6fc, #0a0f1d);
+    --panel: light-dark(#ffffff, #0f1c33);
+    --side:  light-dark(#eef2fa, #0b1526);
+    --line:  light-dark(#dce4f2, #1c3155);
+    --text:  light-dark(#10203c, #e7eefa);
+    --muted: light-dark(#56688c, #8ca0c4);
+    --accent: #5eead4;
+    --danger: #ff6b81;
+    --me:   color-mix(in oklab, var(--accent) 24%, var(--panel));
+    --them: color-mix(in oklab, var(--line) 60%, var(--panel));
+    --font: "Inter", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --r: 14px;
+  }
+}
+
+@layer layout {
+  body { font: 400 14px/1.5 var(--font); background: var(--bg); color: var(--text); }
+
+  .auth {
+    display: grid; place-items: center; min-height: 100dvh; padding: 1rem;
+    background: radial-gradient(60rem 28rem at 85% -10%, color-mix(in oklab, var(--accent) 20%, transparent), transparent),
+                radial-gradient(40rem 24rem at -10% 110%, color-mix(in oklab, #4c6fff 18%, transparent), transparent);
+  }
+
+  .chat { display: grid; grid-template-columns: clamp(240px, 26vw, 320px) 1fr; height: 100dvh; }
+  .side { display: grid; grid-template-rows: auto 1fr auto; background: var(--side); border-right: 1px solid var(--line); min-height: 0; }
+  .main { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; min-height: 0; }
+  .messages { overflow: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: .9rem;
+              container: msgs / inline-size; scrollbar-width: thin; scroll-behavior: smooth; }
+
+  @media (max-width: 720px) {
+    .chat { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .side { grid-template-rows: auto auto; border: 0; border-bottom: 1px solid var(--line); }
+    .tools { display: none !important; }
+    .contacts { display: flex !important; overflow-x: auto; }
+  }
+}
+
+@layer components {
+  .muted { color: var(--muted); } .center { text-align: center; } .ok { color: var(--accent); display: block; font-size: 11.5px; }
+  small { font-size: 11.5px; }
+  code { font-family: var(--mono); font-size: 12px; }
+
+  /* auth card */
+  .card {
+    width: min(400px, 100%); display: grid; gap: .9rem; padding: 2rem; border-radius: 18px;
+    background: var(--panel); border: 1px solid var(--line); box-shadow: 0 24px 60px #0004;
+    .brand { font: 600 18px "Space Grotesk", var(--font); }
+    h2 { font: 600 24px "Space Grotesk", var(--font); }
+    label { display: grid; gap: .3rem; font-size: 12.5px; color: var(--muted); }
+    input { padding: .7rem .8rem; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text);
+            &:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; } }
+    &[data-mode="login"] .only-register { display: none; }
+    .error { color: var(--danger); min-height: 1.2em; font-size: 12.5px; }
+    .note { padding: .7rem; border-radius: 10px; border: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
+  }
+  .btn { padding: .8rem; border: 0; border-radius: 10px; background: var(--accent); color: #04211c; font-weight: 600; cursor: pointer;
+         &:hover { filter: brightness(1.06); } &:active { scale: .98; } }
+  .link { background: none; border: 0; color: var(--accent); font-weight: 600; cursor: pointer; }
+  .ghost { margin-left: auto; background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 8px; padding: .35rem .6rem; cursor: pointer; font-size: 11px;
+           &:hover { color: var(--text); } }
+
+  /* sidebar */
+  .me, .head { display: flex; align-items: center; gap: .7rem; padding: 1rem 1.1rem; border-bottom: 1px solid var(--line); }
+  .head { background: var(--panel); }
+  .avatar { display: grid; place-items: center; inline-size: 38px; aspect-ratio: 1; border-radius: 50%; flex: none;
+            background: var(--accent); color: #04211c; font-weight: 600;
+            &.blue { background: #4c6fff; color: #fff; } &.red { background: var(--danger); color: #2b0410; } }
+  .pill { margin-left: auto; padding: .35rem .75rem; border-radius: 99px; font-size: 11.5px; font-weight: 600; color: var(--accent);
+          background: color-mix(in oklab, var(--accent) 14%, transparent); border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent); }
+  .contacts { display: grid; align-content: start; gap: 2px; padding: .5rem; overflow: auto; }
+  .contact {
+    display: flex; align-items: center; gap: .7rem; padding: .65rem; border-radius: 12px; cursor: pointer;
+    input { position: absolute; opacity: 0; pointer-events: none; }
+    .cinfo { flex: 1; min-width: 0; display: grid; small { color: var(--muted); } }
+    &:hover { background: color-mix(in oklab, var(--line) 40%, transparent); }
+    &:has(input:checked) { background: color-mix(in oklab, var(--accent) 14%, transparent); }
+    &:has(input:focus-visible) { outline: 2px solid var(--accent); }
+  }
+  .badge { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--danger); color: #fff; }
+  .tools { display: flex; gap: .5rem; padding: .75rem; border-top: 1px solid var(--line); }
+  .tool { flex: 1; padding: .55rem; border-radius: 9px; cursor: pointer; font-size: 11.5px; color: var(--muted);
+          background: var(--panel); border: 1px solid var(--line); &:hover { color: var(--text); } }
+
+  /* messages */
+  .msg { display: grid; gap: .3rem; max-inline-size: min(62%, 34rem); animation: pop .22s ease-out;
+         &.me { align-self: flex-end; justify-items: end; } &.them { align-self: flex-start; justify-items: start; } }
+  @container msgs (width < 520px) { .msg { max-inline-size: 90%; } }
+  .bubble { padding: .6rem .9rem; border-radius: var(--r); background: var(--them); overflow-wrap: anywhere;
+            .me & { background: var(--me); border-end-end-radius: 4px; } .them & { border-end-start-radius: 4px; }
+            &.flagged { background: color-mix(in oklab, var(--danger) 14%, var(--panel)); outline: 1px solid var(--danger); } }
+  .flag { display: flex; gap: .5rem; padding: .5rem .7rem; border-radius: 9px; font-size: 11.5px; color: var(--danger);
+          border: 1px solid var(--danger); background: color-mix(in oklab, var(--danger) 10%, transparent); }
+  .meta { font-size: 10.5px; color: var(--muted); }
+  details.cipher { font-size: 10.5px; color: var(--muted);
+    summary { cursor: pointer; } summary:hover { color: var(--accent); }
+    code { display: block; margin-top: .3rem; padding: .5rem .6rem; max-inline-size: 22rem; border: 1px dashed var(--accent);
+           border-radius: 8px; color: var(--accent); overflow-wrap: anywhere; } }
+
+  /* composer */
+  .composer { display: grid; grid-template-columns: 1fr auto; gap: .6rem; padding: 1rem 1.25rem; background: var(--panel); border-top: 1px solid var(--line);
+    textarea { field-sizing: content; max-block-size: 7.5rem; resize: none; padding: .7rem .9rem; border-radius: 12px;
+               border: 1px solid var(--line); background: var(--bg); &:focus-visible { outline: 2px solid var(--accent); } }
+    small { grid-column: 1 / -1; } }
+  .send { inline-size: 42px; aspect-ratio: 1; border: 0; border-radius: 50%; background: var(--accent); color: #04211c; cursor: pointer; align-self: end; }
+
+  /* popover drawers (no JS toggling needed) */
+  .drawer {
+    position: fixed; inset: 0 0 0 auto; margin: 0; inline-size: min(400px, 92vw); block-size: 100dvh; padding: 1.1rem;
+    background: var(--panel); color: var(--text); border: 0; border-inline-start: 1px solid var(--line); overflow: auto;
+    translate: 100% 0; transition: translate .25s ease, display .25s allow-discrete, overlay .25s allow-discrete;
+    &:popover-open { translate: 0 0; @starting-style { translate: 100% 0; } }
+    &::backdrop { background: #0006; }
+    h3 { font: 600 16px "Space Grotesk", var(--font); }
+    > div { display: grid; gap: .6rem; margin-top: .8rem; }
+  }
+  .entry { font: 11px/1.6 var(--mono); padding: .6rem .7rem; border-radius: 9px; border: 1px solid var(--line); background: var(--bg);
+           color: var(--muted); overflow-wrap: anywhere; white-space: pre-wrap; b { color: var(--accent); font-weight: 500; }
+           &.danger { border-color: var(--danger); } }
+}
+
+@layer motion {
+  @keyframes pop { from { opacity: 0; translate: 0 8px; scale: .98; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+}
