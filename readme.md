@@ -12,10 +12,10 @@ sees plaintext.
 - Python (Flask/Django) REST backend
 
 ## Tech Stack
-Python · Flask/Django · React · [database] · [crypto library]
+Python · Flask/Django · React ·
 
 ## Getting Started
-1. Clone the repo: `git clone https://github.com/i-poorvi17/<repo-name>.git`
+1. Clone the repo: `git clone https://github.com/i-poorvi17/secure-chat-application.git`
 2. Backend: `cd backend && pip install -r requirements.txt && python app.py`
 3. Frontend: `cd frontend && npm install && npm start`
 
